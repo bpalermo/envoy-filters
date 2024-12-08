@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*.*.*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.9.1
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      - name: Test
+        run: |
+          bazel test //...
+      - name: Build
+        run: |
+          bazel build //...
+      - name: Push
+        if: github.event_name != 'pull_request' && github.ref_type != 'tag'
+        run: |
+          bazel run //ext-proc/cmd/server:push -- --tag latest
+          bazel run //ext-proc/cmd/server:push -- --tag ${{ github.sha }}
+      - name: Push by tag
+        if: github.event_name != 'pull_request' && github.ref_type == 'tag'
+        run: |
+          bazel run //ext-proc/cmd/server:push -- --tag ${{  github.ref_name }}
