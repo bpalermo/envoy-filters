@@ -1,0 +1,35 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+exports_files(["LICENSE"])
+
+# gazelle:prefix github.com/bpalermo/envoy-filters
+# gazelle:resolve_regexp go github\.com/envoyproxy/go-control-plane/(.*) @envoy_api//$1:pkg_go_proto
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
+
+platform(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "linux_amd64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    visibility = ["//visibility:public"],
+)
