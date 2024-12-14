@@ -44,34 +44,22 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 		resp := &pb.ProcessingResponse{}
 		switch value := req.Request.(type) {
 		case *pb.ProcessingRequest_RequestHeaders:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_RequestHeaders{},
-			}
+			log.Println("ProcessingRequest_RequestHeaders")
 			break
 		case *pb.ProcessingRequest_RequestBody:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_RequestBody{},
-			}
+			log.Println("ProcessingRequest_RequestBody")
 			break
 		case *pb.ProcessingRequest_RequestTrailers:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_RequestTrailers{},
-			}
+			log.Println("ProcessingRequest_RequestTrailers")
 			break
 		case *pb.ProcessingRequest_ResponseHeaders:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_ResponseHeaders{},
-			}
+			log.Println("ProcessingRequest_ResponseHeaders")
 			break
 		case *pb.ProcessingRequest_ResponseBody:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_ResponseBody{},
-			}
+			log.Println("ProcessingRequest_ResponseBody")
 			break
 		case *pb.ProcessingRequest_ResponseTrailers:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_ResponseTrailers{},
-			}
+			log.Println("ProcessingRequest_ResponseTrailers")
 			break
 		default:
 			log.Printf("Unknown Request type %v\n", value)
@@ -84,10 +72,12 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 
 func main() {
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	log.Printf("starting listener on port: %d\n", *port)
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	log.Println("listener started")
 
 	grpcServer := grpc.NewServer()
 
@@ -108,6 +98,7 @@ func main() {
 	}()
 
 	pb.RegisterExternalProcessorServer(grpcServer, &ExternalProcessorServer{})
+	log.Println("starting server")
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)

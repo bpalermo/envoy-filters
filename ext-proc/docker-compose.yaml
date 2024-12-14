@@ -1,0 +1,18 @@
+services:
+  server:
+    image: palermo/envoy-filters-ext-proc:latest
+    pull_policy: missing
+    ports:
+      - "50051:50051"
+  envoy:
+    image: envoyproxy/envoy:distroless-v1.32-latest
+    command:
+      - "--config-path"
+      - "/etc/envoy/envoy.yaml"
+      - "--log-level"
+      - "warn"
+    ports:
+      - "80:80"
+      - "9001:9001"
+    volumes:
+      - ./.container/envoy.yaml:/etc/envoy/envoy.yaml

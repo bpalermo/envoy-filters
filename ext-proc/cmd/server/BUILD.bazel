@@ -22,6 +22,6 @@ go_binary(
 
 go_multi_arch_image(
     name = "server",
-    repository = "index.docker.io/palermo/envoy-filters-ext-proc",
+    repository = "palermo/envoy-filters-ext-proc",
     visibility = ["//visibility:public"],
 )
