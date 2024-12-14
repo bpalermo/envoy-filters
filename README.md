@@ -1,2 +1,2 @@
-# envoy-ext-proc
-Envoy external processor example
+# Envoy filters
+Envoy filter example with load tests
