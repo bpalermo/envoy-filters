@@ -64,9 +64,8 @@ def go_multi_arch_image(name, repository, base = "@distroless_base", container_t
 
     oci_load(
         name = "load",
-        image = ":index",
-        repo_tags = ["latest"],
-        format = "oci",
+        image = ":image",
+        repo_tags = ["{}:{}".format(repository, "latest")],
     )
 
     oci_push(
