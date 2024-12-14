@@ -44,22 +44,34 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 		resp := &pb.ProcessingResponse{}
 		switch value := req.Request.(type) {
 		case *pb.ProcessingRequest_RequestHeaders:
-			log.Println("ProcessingRequest_RequestHeaders")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_RequestHeaders{},
+			}
 			break
 		case *pb.ProcessingRequest_RequestBody:
-			log.Println("ProcessingRequest_RequestBody")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_RequestBody{},
+			}
 			break
 		case *pb.ProcessingRequest_RequestTrailers:
-			log.Println("ProcessingRequest_RequestTrailers")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_RequestTrailers{},
+			}
 			break
 		case *pb.ProcessingRequest_ResponseHeaders:
-			log.Println("ProcessingRequest_ResponseHeaders")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_ResponseHeaders{},
+			}
 			break
 		case *pb.ProcessingRequest_ResponseBody:
-			log.Println("ProcessingRequest_ResponseBody")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_ResponseBody{},
+			}
 			break
 		case *pb.ProcessingRequest_ResponseTrailers:
-			log.Println("ProcessingRequest_ResponseTrailers")
+			resp = &pb.ProcessingResponse{
+				Response: &pb.ProcessingResponse_ResponseTrailers{},
+			}
 			break
 		default:
 			log.Printf("Unknown Request type %v\n", value)

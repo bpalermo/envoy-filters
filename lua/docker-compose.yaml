@@ -1,8 +1,4 @@
 services:
-  server:
-    image: palermo/envoy-filters-ext-proc:latest
-    ports:
-      - "50051:50051"
   envoy:
     image: envoyproxy/envoy:distroless-v1.32-latest
     command:
