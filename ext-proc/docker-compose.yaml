@@ -3,8 +3,11 @@ services:
     image: palermo/envoy-filters-ext-proc:latest
     ports:
       - "50051:50051"
+    volumes:
+      - tmp-data:/tmp
+
   envoy:
-    image: envoyproxy/envoy:distroless-v1.32-latest
+    image: envoyproxy/envoy:v1.32-latest
     command:
       - "--config-path"
       - "/etc/envoy/envoy.yaml"
@@ -14,4 +17,8 @@ services:
       - "80:80"
       - "9001:9001"
     volumes:
+      - tmp-data:/tmp
       - ./.container/envoy.yaml:/etc/envoy/envoy.yaml
+
+volumes:
+  tmp-data:

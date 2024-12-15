@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -17,8 +16,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var (
-	port = flag.Int("port", 50051, "The server port")
+const (
+	listenSocketPath = "/tmp/ext_proc.sock"
 )
 
 type ExternalProcessorServer struct {
@@ -84,10 +83,13 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 
 func main() {
 	flag.Parse()
-	log.Printf("starting listener on port: %d\n", *port)
-	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *port))
+	log.Printf("starting unix socket: %s\n", listenSocketPath)
+	lis, err := net.Listen("unix", listenSocketPath)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
+	}
+	if err := os.Chmod(listenSocketPath, os.ModePerm); err != nil {
+		log.Fatalf("failed to set socket file permissions: %v", err)
 	}
 	log.Println("listener started")
 
@@ -107,12 +109,16 @@ func main() {
 	go func() {
 		<-signalCtx.Done()
 		grpcServer.GracefulStop()
+		err := os.Remove(listenSocketPath)
+		if err != nil {
+			log.Printf("could not remove socket file: %v\n", err)
+		}
 	}()
 
 	pb.RegisterExternalProcessorServer(grpcServer, &ExternalProcessorServer{})
 	log.Println("starting server")
 	err = grpcServer.Serve(lis)
 	if err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("failed to serve: %v\n", err)
 	}
 }
