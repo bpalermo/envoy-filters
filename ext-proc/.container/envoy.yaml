@@ -68,9 +68,7 @@ static_resources:
                             inline_string: "hello world!"
   clusters:
     - name: ext_proc_cluster
-      type: STRICT_DNS
-      dns_lookup_family: V4_ONLY
-      lb_policy: ROUND_ROBIN
+      type: STATIC
       connect_timeout: 1s
       typed_extension_protocol_options:
         envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
@@ -83,6 +81,5 @@ static_resources:
           - lb_endpoints:
               - endpoint:
                   address:
-                    socket_address:
-                      address: server
-                      port_value: 50051
+                    pipe:
+                      path: /tmp/ext_proc.sock
