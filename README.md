@@ -44,6 +44,52 @@ default ✓ [======================================] 10 VUs  00m03.2s/10m0s  500
 ```
 
 ## External Processor
+### Local reply
+
+Path `/`
+
+```bash
+k6 run ext-proc/.loadtest/script.js
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: ext-proc/.loadtest/script.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 5000 iterations for each of 10 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+
+     data_received..................: 6.5 MB 2.4 MB/s
+     data_sent......................: 3.8 MB 1.4 MB/s
+     http_req_blocked...............: avg=4.75µs   min=1.21µs   med=3.69µs   max=7.44ms   p(95)=6.78µs   p(99)=17.18µs  p(99.9)=150.51µs
+     http_req_connecting............: avg=80ns     min=0s       med=0s       max=476.74µs p(95)=0s       p(99)=0s       p(99.9)=0s      
+     http_req_duration..............: avg=396.1µs  min=190.94µs med=363.43µs max=9.06ms   p(95)=616.76µs p(99)=998.45µs p(99.9)=1.59ms  
+       { expected_response:true }...: avg=396.1µs  min=190.94µs med=363.43µs max=9.06ms   p(95)=616.76µs p(99)=998.45µs p(99.9)=1.59ms  
+     http_req_failed................: 0.00%  0 out of 50000
+     http_req_receiving.............: avg=40.9µs   min=10.35µs  med=32.49µs  max=1.12ms   p(95)=65.66µs  p(99)=302.9µs  p(99.9)=599.52µs
+     http_req_sending...............: avg=12.51µs  min=3.4µs    med=10.04µs  max=7.42ms   p(95)=19.74µs  p(99)=44.16µs  p(99.9)=358.17µs
+     http_req_tls_handshaking.......: avg=0s       min=0s       med=0s       max=0s       p(95)=0s       p(99)=0s       p(99.9)=0s      
+     http_req_waiting...............: avg=342.68µs min=154.06µs med=318.18µs max=8.95ms   p(95)=514.07µs p(99)=796.81µs p(99.9)=1.37ms  
+     http_reqs......................: 50000  18237.050342/s
+     iteration_duration.............: avg=464.77µs min=236.87µs med=425.17µs max=9.18ms   p(95)=733.66µs p(99)=1.16ms   p(99.9)=1.82ms  
+     iterations.....................: 50000  18237.050342/s
+     vus............................: 10     min=10         max=10
+     vus_max........................: 10     min=10         max=10
+
+
+running (00m02.7s), 00/10 VUs, 50000 complete and 0 interrupted iterations
+default ✓ [======================================] 10 VUs  00m02.7s/10m0s  50000/50000 iters, 5000 per VU
+```
+
+### With filter
+
+Path `/ext/`
 
 ```bash
 $ k6 run ext-proc/.loadtest/script.js
