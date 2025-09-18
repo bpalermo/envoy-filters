@@ -12,5 +12,5 @@ export const options = {
 };
 
 export default function () {
-  http.get('http://localhost/ext/');
+  http.get('http://localhost/');
 }
