@@ -8,8 +8,11 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
+	"github.com/bpalermo/envoy-filters/ext-proc/pkg/filter"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	pb "github.com/envoyproxy/go-control-plane/envoy/service/ext_proc/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,6 +21,10 @@ import (
 
 const (
 	listenSocketPath = "/tmp/ext_proc.sock"
+)
+
+var (
+	hashFilter *filter.Filter
 )
 
 type ExternalProcessorServer struct {
@@ -43,10 +50,8 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 		resp := &pb.ProcessingResponse{}
 		switch value := req.Request.(type) {
 		case *pb.ProcessingRequest_RequestHeaders:
-			resp = &pb.ProcessingResponse{
-				Response: &pb.ProcessingResponse_RequestHeaders{},
-			}
-			break
+			h := req.Request.(*pb.ProcessingRequest_RequestHeaders)
+			resp = handleRequestHeaders(h)
 		case *pb.ProcessingRequest_RequestBody:
 			resp = &pb.ProcessingResponse{
 				Response: &pb.ProcessingResponse_RequestBody{},
@@ -79,6 +84,54 @@ func (e *ExternalProcessorServer) Process(stream pb.ExternalProcessor_ProcessSer
 			log.Printf("send error %v", err)
 		}
 	}
+}
+
+func handleRequestHeaders(req *pb.ProcessingRequest_RequestHeaders) (resp *pb.ProcessingResponse) {
+	resp = &pb.ProcessingResponse{
+		Response: &pb.ProcessingResponse_RequestHeaders{},
+	}
+
+	routingHeaderValue := ""
+	for _, header := range req.RequestHeaders.Headers.Headers {
+		if header.Key == "x-nu-routing" {
+			routingHeaderValue = string(header.RawValue)
+			break
+		}
+	}
+
+	if strings.EqualFold(routingHeaderValue, "") {
+		log.Println("No x-nu-routing header found or empty")
+		return resp
+	}
+
+	hash := hashFilter.Hash(routingHeaderValue)
+	if hash == nil {
+		log.Printf("Invalid routing header value: %s\n", routingHeaderValue)
+		return resp
+	}
+
+	resp.Response.(*pb.ProcessingResponse_RequestHeaders).RequestHeaders = &pb.HeadersResponse{
+		Response: &pb.CommonResponse{
+
+			ClearRouteCache: true,
+			HeaderMutation: &pb.HeaderMutation{
+				SetHeaders: []*corev3.HeaderValueOption{
+					{
+						Header: &corev3.HeaderValue{
+							Key:   "x-nu-hash",
+							Value: *hash,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return resp
+}
+
+func init() {
+	hashFilter = filter.NewFilter()
 }
 
 func main() {
